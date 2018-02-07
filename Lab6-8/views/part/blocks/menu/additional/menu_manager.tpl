@@ -1,0 +1,1 @@
+<li><a href="/catalog">{CV="test_catalog_link"}</a></li>
