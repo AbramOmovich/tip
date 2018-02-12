@@ -163,11 +163,11 @@ class DB
                     $this->query .= " {$order['field']} {$order['ord']}, ";
                 }
             }
-            $this->query .= " {$last['field']} {$last['ord']}";
+            $this->query .= " {$last['field']} {$last['ord']} ";
         }
 
         if (isset($this->constraints['limit'])){
-            $this->query .= "LIMIT {$this->constraints['limit']}";
+            $this->query .= "LIMIT {$this->constraints['limit']} ";
         }
 
     }

@@ -6,9 +6,7 @@ class Route implements \ArrayAccess
 {
     private $response;
 
-    private $lastRoute;
-
-    private static $params;
+    private static $params = [];
 
     private static $instance;
 
@@ -39,7 +37,7 @@ class Route implements \ArrayAccess
         return $this;
     }
 
-    public function saveRoute(&$method, $url, $controllerMethod)
+    private function saveRoute(&$method, $url, $controllerMethod)
     {
         if (preg_match_all('@{(?P<keys>\w+)}@', $url, $params)){
             foreach ($params[0] as $param){
@@ -49,20 +47,10 @@ class Route implements \ArrayAccess
             foreach ($params['keys'] as $key){
                 $method[$url]['params'][] = [ 'key' => $key, 'req' => false]; //true means required
             }
-
         }
         $method[$url]['controller'] = $controllerMethod;
         $method[$url]['auth'] = false;
-
-        $this->lastRoute = &$method[$url];
     }
-
-    public function auth()
-    {
-        $this->lastRoute['auth'] = true;
-        return $this;
-    }
-
 
     public function processRequest()
     {
@@ -99,7 +87,7 @@ class Route implements \ArrayAccess
     protected function callController($class, $method)
     {
         $class = 'PTS\Controllers\\' . $class;
-        return (new $class)->$method();
+        return (new $class)->$method(... array_values(self::params()));
     }
 
     public function processResponse()

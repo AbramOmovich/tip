@@ -16,16 +16,6 @@ trait Model
 
     protected function __construct(){}
 
-    public function __get($name)
-    {
-        return $this->attributes[$name];
-    }
-
-    public function __set($name, $value)
-    {
-        $this->attributes[$name] = $value;
-    }
-
     public static function create(array $attributes = [])
     {
         $model = new self();
@@ -79,10 +69,10 @@ trait Model
         return [];
     }
 
-    public function paginate(int $limit = 15, int $page = 1){
-        if ($page > 1){
-            self::$db->limit(($limit * $page - 1), $limit);
-        }else{
+    public function paginate(int $limit = 15, int $page = 0) {
+        if ($page > 0) {
+            self::$db->limit(($limit * $page), $limit);
+        } else {
             self::$db->limit($limit);
         }
 
@@ -215,6 +205,11 @@ trait Model
         self::$db->where($field, $value, $operator, $condition);
 
         return $this;
+    }
+
+    public function getConnection()
+    {
+        return self::$db;
     }
 
     public function getAsArray() : array {

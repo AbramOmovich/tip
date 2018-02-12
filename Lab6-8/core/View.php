@@ -34,7 +34,7 @@ class View
     protected $dynamicVars = [];
 
 
-    public function __construct(string $viewName, array $params = [])
+    public function __construct(string $viewName, $params = [])
     {
         $this->dirPath = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . self::VIEWS_FOLDER . DIRECTORY_SEPARATOR;
         $fullPath = $this->dirPath . $viewName . self::TEMPLATE_EXT;
@@ -44,15 +44,16 @@ class View
             if (!empty($params)) $this->params = $params;
         }
         else throw new \Exception(str_replace('{name}', $fullPath, self::TEMPLATE_NOT_FOUND));
+
+        $this->processExtends();
+
         return $this;
     }
-
 
     /**
      * Checks if template extends another template.
      * Each template can extend only ONE template!
-     * Data placed between {SECTION="section_name"} and {ENDSECTION}
-     * will only be used.
+     * Data placed between {SECTION="section_name"} and {ENDSECTION} will only be used.
      * Data from "section_name" will be places in parent's {SLOT="section_name"}.
      */
     protected function processExtends(){
@@ -239,11 +240,19 @@ class View
 
             $matches['cv_name'] = array_unique($matches['cv_name']);
             $matches[0] = array_unique($matches[0]);
+            // Making array [ 'CV_VAR_placeholder' => 'cv_var_name'].
+            $vars_from_tpl = array_combine($matches[0], $matches['cv_name']);
 
-            //making array [ 'CV_VAR_placeholder' => 'cv_var_name']
-            $this->configVars = array_combine($matches[0], $matches['cv_name']);
+            foreach ($vars_from_tpl as $placeholder => $value) {
+                if (!isset($this->configVars[$placeholder]) || $this->configVars[$placeholder] !== $value) {
+                    $this->configVars[$placeholder] = $value;
+                }
+                else{
+                    unset($vars_from_tpl[$placeholder]);
+                }
+            }
 
-            return array_values($this->configVars);
+            return $vars_from_tpl;
 
         }
         else return [];
@@ -270,40 +279,25 @@ class View
         }
 
         foreach ($this->configVars as $placeHolder => $cv_name){
-            if (isset($configVars[$cv_name])) $this->configVars[$placeHolder] = $configVars[$cv_name];
+            if (isset($configVars[$cv_name])) {
+                $this->configVars[$placeHolder] = $configVars[$cv_name];
+            }
         }
 
     }
 
-    protected function processConfigVars(){
-
-        $required_vars = $this->getRequiredConfigVars();
-
-        $cvValues = $this->db->select(self::CV_TABLE, ['d_name' ,'d_value'])
-            ->whereIn('d_name', $required_vars)->get();
-
-        foreach ($cvValues as $key => $record){
-            $cvValues [$record['d_name']] = $record['d_value'];
-            unset($cvValues[$key]);
+    protected function processConfigVars()
+    {
+        if ($this->configVars) {
+            $this->putVarsInPlaceHolders($this->configVars);
+        } else {
+            throw new \Exception( str_replace('{vars}', '[' . implode('] [', $vars) . ']',
+                self::CV_VARS_NOT_FOUND));
         }
-
-        $this->setConfigVars($cvValues);
-
-        $this->putVarsInPlaceHolders($this->configVars);
-
     }
 
-
-    public function getDB(DB $db) : View {
-        $this->db = $db;
-
-        $this->processView();
-
-        return $this;
-    }
-
-    protected function processIncludes(){
-
+    protected function processIncludes()
+    {
         while (preg_match(self::INCLUDE_PATTERN, $this->viewText, $matches)) {
             $this->viewText = str_replace(
                 $matches[0],
@@ -312,7 +306,6 @@ class View
         }
 
     }
-
 
     public function show(){
         return $this->viewText;

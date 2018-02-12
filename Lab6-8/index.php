@@ -1,17 +1,12 @@
 <?php
 
 declare(strict_types = 1);
-session_start();
 
-use PTS\Core\Config;
 use PTS\Core\DB;
 use PTS\Core\Route;
 
 require_once 'autoload.php';
+$config = require_once 'db_config.php';
 
-Config::set('config.php');
-DB::setConfig(Config::get('db'));
-
-Config::loadConfigFromDB(DB::getObject());
-
+DB::setConfig($config);
 Route::run()->processRequest()->processResponse();

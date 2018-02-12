@@ -1,1 +1,0 @@
-<li><a href="/manage-groups">{CV="manage_groups_link"}</a></li>

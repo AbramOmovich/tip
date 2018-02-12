@@ -2,6 +2,8 @@
 
 namespace PTS\Core;
 
+use PTS\Controllers\ErrorController;
+
 class Request
 {
     private const responseCodes =
@@ -91,14 +93,10 @@ class Request
     public static function error(int $code)
     {
         Request::header($code);
-
         if ($code === 401) return Request::back('/register');
 
-        $viewName = "error/{$code}";
-        if (View::isView($viewName)){
-            return (new View($viewName))->getDB(DB::getObject());
-        }
-        return null;
+        $controller = new ErrorController();
+        return $controller->errorPage($code);
     }
 
     public static function getAll() : array

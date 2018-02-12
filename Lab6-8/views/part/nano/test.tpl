@@ -1,1 +1,0 @@
-<a href="{DV="link_prefix"}/{CYV="t_id"}">{CYV="t_name"}</a>

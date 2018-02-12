@@ -1,1 +1,0 @@
-<option value="{CYV="qt_id"}">{CYV="qt_description"}</option>

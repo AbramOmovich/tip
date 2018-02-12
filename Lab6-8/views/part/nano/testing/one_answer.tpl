@@ -1,1 +1,0 @@
-<input type="radio" name="correct" value="{CYV="a_id"}"><span>{CYV="a_text"}</span><br>

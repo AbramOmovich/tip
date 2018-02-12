@@ -4,8 +4,8 @@ namespace PTS\Models;
 
 class Model implements \ArrayAccess
 {
-
     protected const PRIMARY_KEY_NOT_SET = 'Primary key for model [{class}] not set';
+
     protected const PRIMARY_KEY_NOT_UNQ = 'Primary key [{key}] for table [{table}] is not unique';
 
     protected $table;
@@ -16,27 +16,31 @@ class Model implements \ArrayAccess
 
     protected $hasDefault = [];
 
-    public function offsetExists($offset)
+    public function __get($name)
     {
-        if (isset($this->attributes[$offset])) return true;
-        else return false;
+        return $this->attributes[$name];
     }
 
+    public function __set($name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
+
+    public function offsetExists($offset)
+    {
+        return isset($this->attributes[$offset]);
+    }
 
     public function offsetGet($offset)
     {
+
         return $this->attributes[$offset];
     }
-
 
     public function offsetSet($offset, $value)
     {
         $this->attributes[$offset] = $value;
     }
 
-
-    public function offsetUnset($offset)
-    {
-        unset($this->attributes[$offset]);
-    }
+    public function offsetUnset($offset) {}
 }
